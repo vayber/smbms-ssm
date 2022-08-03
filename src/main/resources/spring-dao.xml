@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop
+		https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--DataSource:使用Spring的数帮源替换Mybatis的配置 其他数据源：c3p0、dbcp、druid
+		这使用Spring提供的JDBC: org.springframework.jdbc.datasource -->
+    <!--data source -->
+   <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+
+       <property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost:3306/smbms?serverTimezone=GMT%2B8&amp;useSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
+       <property name="username" value="root"/>
+       <property name="password" value="123456"/>
+
+   </bean>
+
+<!--  sqlSessionFactory  -->
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <!--  这里可以绑定mybatis配置文件 可以把mybatis配置文件写到这里   -->
+    <property name="configLocation" value="classpath:mybatis-config.xml"/>
+</bean>
+
+
+
+<!--  配置dao接口扫描包 动态代理实现dao接口实现类注入spring中  生成代理注入到 Spring 它扫描特定的包，自动帮我们成批地创建映射器-->
+<!--    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+<!--    因为value 属性需要一个正确并且存在的值。如果配置文件出错，或者没被加载，整个dataSource 就不存在，那么sqlSessionFactory 也是错误的，
+不存在的值， value值就不存在，不会在这个地方抛出异常；但是使用ref 属性，就会出现，不管这个引入的值对不对，都会被使用。但实际会因为这个值不存在，导致异常。
+所以在1.1.0以后，MapperScannerConfigure提供了String类型的sqlSessionFactoryBeanName，
+通过，这样先将bean name注入到sqlSessionFactoryBeanName，等到spring初始化完成后，再通过bean name构建sqlSessionFactory。
+  -->
+    <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <!--basePackage指定要扫描的包，在此包之下的映射器都会被搜索到。可指定多个包，包与包之间用逗号或分号分隔-->
+        <property name="basePackage" value="com.vayber.smbms.dao"/>
+    </bean>
+
+
+</beans>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="GBK" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--MyBatis 真正的力量是在映射语句中。这里是奇迹发生的地方。
+    对于所有的力量,SQL 映射的 XML 文件是相当的简单。
+    当然如果你将它们和对等功能的 JDBC 代码来比较,你会发现映射文件节省了大约 95%的代码量。
+    MyBatis 的构建就是聚焦于 SQL 的,使其远离于普通的方式。
+-->
+<!--namespace为全限定名，使用该映射文件中配置的已映射的sql语句时，最好加上全限定名，不然可能会造成语句模糊。-->
+<!--namespace=绑定一个对应的Dao/Mapper接口 -->
+<!-- vayber.mapper public interface UserMapper -->
+<mapper namespace="com.vayber.smbms.dao.User.UserMapper">
+
+    <!--参数类型或返回值类型为int 可不写  查询语句要写结果集类型  -->
+    <select id="getLoginUser" resultType="com.vayber.smbms.pojo.User">
+        select * from smbms_user where userCode = #{userCode} and userPassword = #{userPassword}
+    </select>
+
+    <update id="updateUserPassword" >
+        update smbms_user set userPassword=#{userPassword} where id = #{id}
+    </update>
+
+    <!--    where 元素只会在子元素返回任何内容的情况下才插入 “WHERE” 子句。
+而且，若子句的开头为 “AND” 或 “OR”，where 元素也会将它们去除。-->
+    <select id="getUserCount" resultType="_int">
+        select  count(*) count from smbms_user
+        <where>
+            1=1
+            <if test="userName != null">
+                and userName like concat("%",#{userName},"%")
+            </if>
+            <if test="userRole > 0">
+                and userRole = #{userRole}
+            </if>
+        </where>
+
+    </select>
+
+    <!--  返回类型即是list  但resultType还是写成resultType="user"（user为集合list中的实体类）-->
+    <select id="getUserList" resultType="com.vayber.smbms.pojo.User">
+        select  u.*,r.roleName as userRoleName from smbms_user u,smbms_role r
+        <where>
+            u.userRole = r.id
+            <if test="userName != null">
+                and userName like concat("%",#{userName},"%")
+            </if>
+            <if test="userRole > 0">
+                and userRole = #{userRole}
+            </if>
+
+        </where>
+    </select>
+
+    <!--  对象中的属性可以直接取出来  -->
+    <insert id="addUser" parameterType="com.vayber.smbms.pojo.User">
+        insert into smbms_user (userCode,userName,userPassword,userRole,
+                                gender,age,birthday,phone,address,createdBy,creationDate)
+        values (#{userCode},#{userName},#{userPassword},#{userRole},#{gender},#{age},
+                #{birthday},#{phone},#{address},#{createdBy},#{creationDate});
+    </insert>
+
+
+    <delete id="deleteUser">
+        delete from smbms_user where id = #{id}
+    </delete>
+
+    <update id="modifyUser" parameterType="com.vayber.smbms.pojo.User">
+
+        update smbms_user set userName = #{userName},gender = #{gender},age = #{age},
+                              phone = #{phone},address = #{address},userRole = #{userRole}
+                ,modifyBy = #{modifyBy} ,modifyDate = #{modifyDate} where id = #{id}
+    </update>
+
+    <select id="getQueryUser" resultType="com.vayber.smbms.pojo.User">
+        select * from smbms_user where id = #{id}
+    </select>
+
+</mapper>
